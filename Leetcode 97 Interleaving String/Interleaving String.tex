@@ -1,0 +1,85 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{color}
+
+\setlength{\parindent}{0in}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\begin{document}
+Salutations fellow coders!
+\newline
+\newline
+In this article, we explore the solution to LeetCode problem No. 97 ``Interleaving String". The problem requires of us to determine whether a given string can be created by interleaving the characters of two other given strings. We are to compose a function that accepts three parameters: String S1, String S2, and String S3. Our function returns a Boolean value of true if string S3 can be created by interleaving the characters from strings S1 \& S2; otherwise return false. We present the following two examples from Leetcode to illustrate the problem and its solution. 
+\newline 
+\newline
+Example 1:
+\newline
+\newline
+S1 = ``aabcc", S2 = ``dbbca", S3 = ``aadbbcbcac"
+output = \textbf{true} 
+\newline
+\newline
+Explanation: Our function outputs \textbf{true} here because the characters in S3 appear in the \emph{exact} order as they do in strings S1 and S2. It is therefore true that string S3 is created by interleaving strings S1 and S2.
+\newline
+\newline
+Example 2:
+\newline
+\newline
+S1 = ``aabcc", S2 = ``dbbca", S3 = ``aadbbbaccc"
+output = \textbf{false}
+\newline
+\newline
+Explanation: Here our function outputs \textbf{false} because of the 7th character (`a') that appears to have come from string S2 is out of place relative to the other characters in S2.
+\newline
+\newline
+So how do we solve this problem? Upon initial inspection, one might be tempted to implement the naive solution of generating the set of all strings interleaved from S1 and S2 and checking if S3 is among this set. As the string sizes grow, so does the set, consequently requiring more time to generate it. This method is therefore prohibitively slow and we must do better. So what do we do now? In generating the set of all possible strings, the keen observer will notice that we are performing some computions more than once! This suggests the use of Dynamic Programming as a candidate method for the design of the algorithm that will solve this problem, so we will proceed to use it. Before we begin, we must first observe the notion that \textbf{in order for a string to be interleaved from two other strings, the last character MUST be one of the last characters from any of the other two strings!} With this fact in mind, we construct an algorithm similar to the algorithm used to determine the Longest Common Subsequence between two strings (it is strongly suggested the reader familiarize themselves with that problem before continuing). We will solve this problem using recursion with memoization, the steps of which are outlined below.
+\newline
+\newline
+Step 1: We will maintain three pointers: \textit{i, j, k} which point to the characters in strings S1, S2, and S3 respectively. They will be initialized to point to the last character in each string.
+\newline
+\newline
+Step 2: We will maintain a memo table of Boolean values where memo[i+1][j+1] is \textbf{true} if S3.charAt(k) is one of the letters from S1.charAt(i) or S2.charAt(j); it is \textbf{false} otherwise. We add one to the values of \textit{i} and \textit{j} to account for the fact that memo[0][0] accounts for an empty string and \emph{NOT} the first two characters of S1 and S2 respectively. 
+\newline
+\newline
+Step 3: We will define a recursive function (call it \textit{dfs} since this is ``depth-first search" on a tree) that will take in as input our three pointers and the memo table which will compare the characters, populate the memo table, and output a Boolean value as to whether the strings are valid up to points \textit{i, j, k}.
+\newline
+\newline
+When comparing the characters, there are four possible cases that will arise:
+
+\begin{itemize}
+\item Case 1: S3.charAt(k) matches S1.charAt(i), we decrement both \textit{i} and \textit{k} by one and call our recursive function on the new pointers. Decrementing \textit{i} and \textit{k} implies that we found a character match and now we must check the remainder of the strings to see if it is a valid interleave. The value placed in the memo table will be the result of the new function call we make.
+\item Case 2: S3.charAt(k) matches S2.charAt(j) same procedure as above except we decrement \textit{j} by one instead if \textit{i} and proceed.
+\item Case 3: S3.charAt(k) matches both S1.charAt(i) \emph{AND} S2.charAt(j). In this situation, we first decrement \textit{i} by one and call the recursive function on \textit{i}-1 and \textit{k}-1 while leaving \textit{j} untouched. We then do the same for \textit{j}-1 and \textit{k}-1. The value of memo[i][j] in this case is the logical \textbf{OR} of the two function calls. Doing this means that up to now, we have no way of determining from which string character S3.charAt(k) came from, so we have no choice but to try the two options of first claiming it came from S1 or second claiming it came from S2.
+\item Case 4: S3.charAt(k) matches neither character from S1.charAt(i) and S2.charAt(j). This means that String S3 cannot be created by interleaving strings S1 and S2, therefore we enter a value of \textbf{false} at memo[i+1][j+1] (remember the empty string) and return \textbf{false}. We no longer continue to test whether S3 is interleaved from S1 and S2 so we do not call the \textit{dfs} function again on the remainder of the string.
+\end{itemize}       
+
+In preprocessing the input variables we consider the following edge cases and their solutions:
+\begin{itemize}
+\item Edge Case 1: String S1 or S2 is empty. We therefore check if S3 is an exact copy of the non-empty string.
+\item Edge Case 2: The length of S3 is not equal to the sum of the lengths of S1 and S2. We simply return \textbf{false} as it is not logically possible to interleave two strings and have the interleaved string not have the same number of characters as the initial two strings.
+\end{itemize}
+
+The code to solve this problem is written in Java and presented on the following page...
+\newpage   
+\lstinputlisting[language=java]{InterleavingString.java}
+
+\end{document}
